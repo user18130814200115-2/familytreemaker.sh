@@ -25,6 +25,7 @@ Between brackets, you can add two tags, Gender (M or F) which colours the box in
 After running compiling the above file using
 `familytreemaker.sh example.tree | dot -Tpng -o example.png`, you get the following image.
 ![example.png](example.png)
+
 DOT can output to many other formats as well, to see all of them check
 `man dot`
 
