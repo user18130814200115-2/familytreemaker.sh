@@ -4,6 +4,17 @@ Make your own family tree using simple syntax and DOT.
 This program is heavily inspired by [familytreemaker](https://github.com/adrienverge/familytreemaker), though this is not just a bash clone of that project.
 The problem I had with [familytreemaker](https://github.com/adrienverge/familytreemaker) is that it started at one ancestor and looped through their children. I however wanted to add the ancestors of my in-laws as well, thus resulting in this program.
 
+## Dependencies
+
+- bash
+    + echo
+    + expr
+    + wc
+- [pl](https://github.com/user18130814200115-2/PrintLines)
+
+### For the actual graphing
+- dot
+
 ## Usage
 You have to make a tree file with the following syntax
 ```
