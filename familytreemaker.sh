@@ -31,25 +31,38 @@ echo "digraph {	node [shape=box];edge [dir=none];"
 i=1
 # First we loop over all lines to make setting for all persons in the tree
 while [ $i -le ${lines%%$1} ]; do
+    # Reset some variables
+    sex=""
+    year=""
+    name=""
     # Get the contents of the line we are working on
     raw=$(pl "$i" "$1")
     # Parse the line so that it includes just the name of the person
-    line=${raw#    }
-    line=${line%% (*}
+    id=${raw#    }
+    id=${id%% (*}
+    # Arguments are added in brackets at the end of the line
+    arguments=${raw#*(}
+    arguments=${arguments%%)}
+    # Split the arguments at the comma
+    IFS=',' read -ra argarr <<< "$arguments"
+    # Get the number of arguments 
+    [ -z "$arguments" ] && n=0 || n="${#argarr[@]}"
+    # Arguments are (in order) sex, birthyear and name
+    [ $n -gt 0 ] && sex=${argarr[0]}
+    [ $n -gt 1 ] && year=${argarr[1]}
+    # If the name is not set, use the id instead
+    [ $n -gt 2 ] && name=${argarr[2]} || name=$id
+    # Print everyone with their $name, $birthyear and...
     # If the person is designated as Male, colour their box blue
-    if [[ "$raw" = *"(M"*")" ]]
+    if [ "$sex" = "M" ]
     then
-	echo "\"$line\"[style=filled,fillcolor=azure2];"
+	echo "\"$id\"[label=\"$name\n$year\",style=filled,fillcolor=azure2];"
     # If they are female colour them orange
-    elif [[ "$raw" = *"(F"*")" ]]
+    elif [ "$sex" = "F" ]
     then
-	echo "\"$line\"[style=filled,fillcolor=bisque];"
-    fi
-    # If there is a comma in the bracketed section (intended for adding birthyears) label the person with their name followed by the birthyear on a newline.
-    if [[ "$raw" = *"("*","*")" ]]
-    then
-	year=$(echo "$raw" | grep -o "[0-9]"...)
-	echo "\"$line\"[label=\"$line\n$year\"];"
+	echo "\"$id\"[label=\"$name\n$year\",style=filled,fillcolor=bisque];"
+    else
+	echo "\"$id\"[label=\"$name\n$year\"];"
     fi
     i=$(expr "$i" + 1)
 done
