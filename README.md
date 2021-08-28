@@ -19,23 +19,34 @@ The problem I had with [familytreemaker](https://github.com/adrienverge/familytr
 You have to make a tree file with the following syntax
 ```
 Parent 1 (M)
-Parent 2 (F, 1999)
-    Child 1 (M , 2016)
-    Child 2 (M)
+Parent 2 (F,1999)
+    Child 1 (M,2016,Child)
+    Child 2 (M,,Child)
     ETC.
 Child 1
-Inlaw 1
+Inlaw 1 (M,,Jhon Doe)
     Grandchild 1
 ```
 Two non-indented lines represent a unity between two people referred to as a household.
 All lines below a household indented with four spaces are the children from this unity.
 
-Between brackets, you can add two tags, Gender (M or F) which colours the box in the final graph and birth year (, 1999) which gets appended on a newline after the name of the person.
+Each line consists of a unique identifier with optional tags:
+`Identifier (Gender,Birthyear,Name)`
+
+Between brackets, you can add three tags seperated by comma's but always in order:
+
+- Gender (M or F)
+    + Colours the box in the final graph
+- Birth year
+    + Which gets appended on a newline after the name of the person, technically, you can add anything you like here.
+- Name
+    + If not set, the identifiere will be used as the name
+
 
 ### Result
 After running compiling the above file using
 `familytreemaker.sh example.tree | dot -Tpng -o example.png`, you get the following image.
-![example.png](example.png)
+![example2.png](example2.png)
 
 DOT can output to many other formats as well, to see all of them check
 `man dot`
