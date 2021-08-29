@@ -46,7 +46,7 @@ Between brackets, you can add three tags seperated by comma's but always in orde
 ### Result
 After running compiling the above file using
 `familytreemaker.sh example.tree | dot -Tpng -o example.png`, you get the following image.
-![example2.png](example2.png)
+![example3.png](example3.png)
 
 DOT can output to many other formats as well, to see all of them check
 `man dot`
@@ -57,3 +57,9 @@ Errors in generation can also be fixed by running
 `familytreemaker.sh example.tree > example.gv`
 and editing the .gv file using a text editor.
 For more information on how to work with DOT and .gv files see [Drawing graphs with DOT](https://www.graphviz.org/pdf/dotguide.pdf).
+### Tips
+In the code, the line
+`echo "{rank=same; ${siblings%%-> }[weight=-1]}"`
+may be modified to
+`echo "{rank=same; ${siblings%%-> }[weight=1]}"`.
+This will result in cleaner trees for small familier, but messier trees for large families (especially if two people have many children)
