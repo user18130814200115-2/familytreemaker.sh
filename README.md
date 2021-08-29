@@ -46,7 +46,7 @@ Between brackets, you can add three tags seperated by comma's but always in orde
 ### Result
 After running compiling the above file using
 `familytreemaker.sh example.tree | dot -Tpng -o example.png`, you get the following image.
-![example2.png](example2.png)
+![example3.png](example3.png)
 
 DOT can output to many other formats as well, to see all of them check
 `man dot`
