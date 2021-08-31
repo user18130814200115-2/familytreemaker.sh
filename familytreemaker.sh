@@ -25,7 +25,17 @@
 file="$1"
 
 GetArguments(){
+    # Process all lines into ID's
+    # Print all ID's separated by a semicolon
+    # This maintains the proper order of the source file which is lost later due to parallel processing.
     sed "$file" -e 's/[][ ]//g' -e 's/(.*)//g' | tr '\n' ';'
+    # Pre-process all lines
+    # Set the colour based on the gener tag
+    # Set an empty label tag
+    # Set the label to the string until and opening bracket
+    # Rearrange the label in case we have set a manual one
+    # Remove all spaces in the ID but not in the label
+    # Place the label between quotation marks
     sed "$file" -e 's/^    //g'\
 	-e 's/[][]//g'\
 	-e 's/(F/[style=filled;fillcolor=bisque;/'\
@@ -41,11 +51,15 @@ GetHouseholds() {
     # We do a multi-line grep (with pcregrep) on the file
     # This will output all member of a household (parents and children) followed by the string [HOUSEHOLD]
     rawgrep=$(pcregrep -Mo "^[A-z].*\n^[A-z].*\n(^    .*\n)*" $file)
+    # Process the data into ID's
     households=$(printf "%s\n\n" "$rawgrep" | sed 's/[][]//g' | sed 's/^$/[HOUSEHOLD]/g' | sed 's/([^)]*)//g' | sed 's/ //g')
+    # Make a regular expression for finding if the children of the household have partners (used for dynamic weight allocation)
     regex=$(printf "%s\n\n" "$rawgrep" | sed 's/^$/[HOUSEHOLD]/g' | grep "^    \\|\[HOUSEHOLD\]" | sed 's/[ ]*([^)]*)//' | sed 's/[A-z]$/&\\\\|/' | sed 's/^    /\^/' | tr -d "\n" | sed 's/\[HOUSEHOLD\]\\\\|/\n/g' | sed 's/\\\\|$//')
     index=0
+    # Loop over each household
     printf "%s;" $households | sed 's/\[HOUSEHOLD\]/\n/g' | { while read household; do
 	lineindex=$((index +1))
+	# Send along the ID's the Index of the household and the corresponding regex line
 	HandleHousehold "${household#;}" "$index" "$(printf "%s" "$regex" | sed "${lineindex}q;d")"
 	index=$((index + 1))
     done
@@ -54,11 +68,13 @@ GetHouseholds() {
 }
 
 HandleHousehold() {
-    # Parents
+    # Variables
     h=h
     div=sub
+    # Parents
     parents="{rank=same;\
 $(printf "%s\n" "$1" |\
+# Define an edge from the parents to the household and shape the household
 cut -d ';' -f '1,2' --output-delimiter " -> h$2 -> ")\
 [weight=10]}\nh$2[shape=point;width=0;height=0]\n"
     # Get The children
@@ -80,18 +96,13 @@ cut -d ';' -f '1,2' --output-delimiter " -> h$2 -> ")\
     # Make sure all the sub-households are vertically aligned AND that there is not trailing ->
     [ $index -gt 1 ] && sh="{rank=same;${sh% -> }[weight=$weight]}\n" || sh=""
     # Now print the whole thing
-    #This done instead of printing at each step to allow for parallel processing
+    # This done instead of printing at each step to allow for parallel processing
     printf "$parents$shs$sh$sh2c$h2sh"
     }
-}
-GetFloating() {
-    raw=$(tail -n1 "$file" | grep "^#")
-    printf "\n${raw#\#}"
 }
 # Start the Graph
 one=$(GetArguments &)
 two=$(GetHouseholds &)
-three=$(GetFloating)
 wait
 # Print the graph
-printf "digraph {node [shape=box];edge [dir=none];rankdir=LR;constraint=false\n%s}\n" "$one$two$three"
+printf "digraph {node [shape=box];edge [dir=none];rankdir=LR;constraint=false\n%s}\n" "$one$two"
